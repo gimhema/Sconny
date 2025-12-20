@@ -2,28 +2,28 @@
 
 const DEFAULT_SCONNY_CONFIG_FILE: &str = "sconny_config.toml";
 
-pub enum llm_services {
+pub enum LlmServices {
     OpenAI,
     Gemini
 }
 
-pub enum scy_os {
+pub enum ScyOs {
     Windows,
     Linux
 }
 
 
-pub struct sconny_setting {
-    pub llm_service: llm_services,
-    pub scy_os: scy_os
+pub struct SconnySetting {
+    pub llm_service: LlmServices,
+    pub ScyOs: ScyOs
 }
 
 
-impl sconny_setting {
-    pub fn new() -> sconny_setting {
-        sconny_setting {
-            llm_service: llm_services::OpenAI,
-            scy_os: scy_os::Linux
+impl SconnySetting {
+    pub fn new() -> SconnySetting {
+        SconnySetting {
+            llm_service: LlmServices::OpenAI,
+            ScyOs: ScyOs::Linux
         }
     }
 
@@ -32,9 +32,9 @@ impl sconny_setting {
         // For now, we just set some default values
 
         // Parse Setting File Here 
-        
 
-        self.llm_service = llm_services::OpenAI;
-        self.scy_os = scy_os::Linux;
+
+        self.llm_service = LlmServices::OpenAI;
+        self.ScyOs = ScyOs::Linux;
     }
 }
