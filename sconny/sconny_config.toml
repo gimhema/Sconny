@@ -1,0 +1,12 @@
+# sconny_config.toml
+llm_service = "openai"
+model = "gpt-5-mini"
+
+# 실행 정책
+dry_run = true
+require_confirmation = true
+timeout_sec = 15
+
+# 강제 지정 (보통은 자동감지로 충분)
+# os = "linux"
+# shell = "/bin/bash"
