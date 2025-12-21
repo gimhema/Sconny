@@ -1,59 +1,30 @@
 // main.rs
-mod scy_console;
 mod scy_api;
+mod scy_console;
 mod scy_prompt;
 mod scy_setting;
 
-use scy_console::{parse_console_request_from_args, run_repl_loop, ConsoleMode};
-use scy_prompt::build_prompt;
+use scy_api::ScyApi;
 use scy_setting::SconnySetting;
 
 fn main() {
     let mut setting = SconnySetting::new();
-    if let Err(e) = setting.load_setting() {
-        eprintln!("Setting load error: {}", e);
-        return;
-    }
+    setting.load_setting();
 
-    let req = match parse_console_request_from_args() {
-        Ok(v) => v,
-        Err(help_or_error) => {
-            eprintln!("{}", help_or_error);
-            return;
+    let api = ScyApi::new();
+
+    // 테스트: "이 디렉토리에서 a.txt b.txt c/ 압축"을 JSON으로만 뽑아보게
+    let system_prompt = "Return JSON like: {\"command\":\"...\",\"notes\":\"...\"}";
+    let user_prompt = "지금 이 디렉토리에 있는 a.txt, b.txt, c/ 들을 tar.gz로 압축하는 리눅스 명령어를 만들어줘.";
+
+    match api.generate_json(&setting, user_prompt, system_prompt) {
+        Ok(json_text) => {
+            println!("=== LLM JSON ===");
+            println!("{}", json_text);
         }
-    };
-
-    // One-shot
-    if let Some(r) = req {
-        if r.mode == ConsoleMode::OneShot {
-            println!("[Captured Request] {}", r.text);
-
-            let prompt = match build_prompt(&setting, &r.text) {
-                Ok(p) => p,
-                Err(e) => {
-                    eprintln!("Prompt build error: {}", e);
-                    return;
-                }
-            };
-
-            println!("\n===== SYSTEM PROMPT =====\n{}\n", prompt.system);
-            println!("===== USER PROMPT =====\n{}\n", prompt.user);
-            return;
+        Err(e) => {
+            eprintln!("API error: {:?}", e);
+            eprintln!("Hint: export OPENAI_API_KEY=... (or SCONNY_OPENAI_API_KEY)");
         }
-    }
-
-    // REPL
-    let result = run_repl_loop(|line| {
-        println!("[Captured Request] {}", line);
-
-        let prompt = build_prompt(&setting, line)?;
-        println!("\n===== SYSTEM PROMPT =====\n{}\n", prompt.system);
-        println!("===== USER PROMPT =====\n{}\n", prompt.user);
-
-        Ok(())
-    });
-
-    if let Err(e) = result {
-        eprintln!("Error: {}", e);
     }
 }
