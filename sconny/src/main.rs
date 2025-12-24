@@ -3,6 +3,7 @@ mod scy_api;
 mod scy_console;
 mod scy_prompt;
 mod scy_setting;
+mod scy_gui;
 
 use scy_api::ScyApi;
 use scy_setting::SconnySetting;
