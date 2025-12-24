@@ -13,7 +13,6 @@ fn main() {
 
     let api = ScyApi::new();
 
-    // 테스트: "이 디렉토리에서 a.txt b.txt c/ 압축"을 JSON으로만 뽑아보게
     let system_prompt = "Return JSON like: {\"command\":\"...\",\"notes\":\"...\"}";
     let user_prompt = "지금 이 디렉토리에 있는 a.txt, b.txt, c/ 들을 tar.gz로 압축하는 리눅스 명령어를 만들어줘.";
 
