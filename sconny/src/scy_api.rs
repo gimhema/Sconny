@@ -64,9 +64,9 @@ impl ScyApi {
 
         let tmp_path = write_temp_json("sconny_openai_req", &body)?;
 
-        let raw = match setting.ScyOs {
+        let raw = match setting.env.os {
             ScyOs::Linux => call_curl_post_json(&url, &api_key, &tmp_path, self.timeout_secs)?,
-            ScyOs::Windows => call_powershell_post_json(&url, &api_key, &tmp_path)?,
+            ScyOs::Windows => call_powershell_post_json(&url, &api_key, &tmp_path, self.timeout_secs)?,
         };
 
         // 응답 JSON에서 output_text(content.text)만 추출
