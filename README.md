@@ -13,3 +13,14 @@ sconny '지금 이 디렉토리에 있는 a.txt, b.txt, c/ 들을 압축해줘'
 프롬프트에는 명령어를 실행해야할 운영체제, 배포판 버전 등 환경정보를 포함한다. 
 
 그리고 리턴값으로 전달받은 리눅스 명령어를 실행함.
+
+
+## Usage
+
+
+```
+export OPENAI_API_KEY="YOUR_KEY"
+cargo run -- "REQUIREMENT"
+
+```
+
