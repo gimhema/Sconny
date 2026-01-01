@@ -4,7 +4,6 @@ mod scy_console;
 mod scy_prompt;
 mod scy_setting;
 // mod scy_gui; // 차후 추가
-mod scy_local_model_loader;
 
 use scy_api::{ScyApi, ScyApiError};
 use scy_console::{parse_console_request_from_args, run_repl_loop, ConsoleMode};
