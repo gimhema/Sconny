@@ -4,6 +4,9 @@ mod scy_console;
 mod scy_prompt;
 mod scy_setting;
 // mod scy_gui; // 차후 추가
+mod ollama_api;
+mod scy_executor;
+
 
 use scy_api::{ScyApi, ScyApiError};
 use scy_console::{parse_console_request_from_args, run_repl_loop, ConsoleMode};
@@ -70,6 +73,10 @@ fn process_request(setting: &SconnySetting, api: &ScyApi, user_text: &str) -> Re
         Ok(json_text) => {
             println!("=== LLM JSON ===");
             println!("{}", json_text);
+
+            crate::scy_executor::handle_plan_json(setting, &json_text)
+                .map_err(|e| format!("Execution error: {}", e))?;
+
             Ok(())
         }
         Err(e) => Err(format_api_error(e)),

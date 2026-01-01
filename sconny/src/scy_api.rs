@@ -6,6 +6,8 @@ use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::scy_setting::{LlmService, ScyOs, SconnySetting};
+use crate::ollama_api::scy_ollama_api::{OllamaApi, OllamaError};
+
 
 #[derive(Debug)]
 pub enum ScyApiError {
@@ -43,11 +45,29 @@ impl ScyApi {
     pub fn generate_json(&self, setting: &SconnySetting, user_prompt: &str, system_prompt: &str) -> Result<String, ScyApiError> {
         match setting.llm_service {
             LlmService::OpenAI => self.openai_responses_json(setting, user_prompt, system_prompt),
-            LlmService::Gemini => {
-                Err(ScyApiError::ParseFailed("Gemini not implemented yet"))
-            }
+            LlmService::Gemini => Err(ScyApiError::ParseFailed("Gemini not implemented yet")),
+            LlmService::Ollama => self.ollama_chat_json(setting, user_prompt, system_prompt), // ✅ 추가
         }
     }
+
+    fn ollama_chat_json(&self, setting: &SconnySetting, user_prompt: &str, system_prompt: &str) -> Result<String, ScyApiError> {
+        let base = setting.ollama_base_url.clone().unwrap_or_else(|| "http://127.0.0.1:11434".to_string());
+        let model = setting.model.clone().unwrap_or_else(|| "gemma3:1b".to_string());
+
+        let client = OllamaApi::new(base, setting.policy.timeout_sec);
+
+        let content = client
+            .chat_once_json_only(&model, system_prompt, user_prompt)
+            .map_err(|e| match e {
+                OllamaError::Io(ioe) => ScyApiError::Io(ioe),
+                OllamaError::CommandFailed{code,stdout,stderr} => ScyApiError::CommandFailed{code,stdout,stderr},
+                OllamaError::ParseFailed(m) => ScyApiError::ParseFailed(m),
+            })?;
+
+        Ok(content)
+    }
+
+
 
     fn openai_responses_json(&self, setting: &SconnySetting, user_prompt: &str, system_prompt: &str) -> Result<String, ScyApiError> {
         let api_key = get_openai_api_key().ok_or(ScyApiError::MissingApiKey)?;
