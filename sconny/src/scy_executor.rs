@@ -15,8 +15,10 @@ pub struct CommandPlan {
 }
 
 pub fn handle_plan_json(setting: &SconnySetting, json_text: &str) -> Result<(), String> {
-    let plan: CommandPlan = serde_json::from_str(json_text)
+    let normalized = normalize_llm_json(json_text)?;
+    let plan: CommandPlan = serde_json::from_str(&normalized)
         .map_err(|e| format!("Failed to parse LLM JSON: {}", e))?;
+
 
     print_plan(&plan);
 
@@ -133,4 +135,49 @@ fn run_shell_command_with_timeout(cmd: &str, timeout_sec: u64) -> Result<(), Str
         eprint!("{}", String::from_utf8_lossy(&out.stderr));
     }
     Ok(())
+}
+
+fn normalize_llm_json(text: &str) -> Result<String, String> {
+    let mut s = text.trim().to_string();
+
+    // 1) ```json ... ``` 또는 ``` ... ``` 제거
+    if s.starts_with("```") {
+        // 첫 줄(```json 포함) 제거
+        if let Some(nl) = s.find('\n') {
+            s = s[nl + 1..].to_string();
+        } else {
+            return Err("LLM output starts with ``` but has no newline".to_string());
+        }
+        // 마지막 ``` 제거
+        if let Some(end) = s.rfind("```") {
+            s = s[..end].to_string();
+        }
+        s = s.trim().to_string();
+    }
+
+    // 2) 앞에 다른 텍스트가 섞여있으면 첫 '{' 또는 '['부터 자르기
+    let obj_pos = s.find('{');
+    let arr_pos = s.find('[');
+    let start = match (obj_pos, arr_pos) {
+        (Some(o), Some(a)) => o.min(a),
+        (Some(o), None) => o,
+        (None, Some(a)) => a,
+        (None, None) => return Err("No JSON object/array start found in LLM output".to_string()),
+    };
+
+    // 3) 뒤쪽도 마지막 '}' 또는 ']'까지 자르기
+    let end_obj = s.rfind('}');
+    let end_arr = s.rfind(']');
+    let end = match (end_obj, end_arr) {
+        (Some(o), Some(a)) => o.max(a),
+        (Some(o), None) => o,
+        (None, Some(a)) => a,
+        (None, None) => return Err("No JSON object/array end found in LLM output".to_string()),
+    };
+
+    if end <= start {
+        return Err("Invalid JSON slice range".to_string());
+    }
+
+    Ok(s[start..=end].trim().to_string())
 }

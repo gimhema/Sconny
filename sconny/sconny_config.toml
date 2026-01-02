@@ -1,6 +1,6 @@
 llm_service = "ollama"
 ollama_base_url = "http://127.0.0.1:11434"
-model = "gemma3:1b"
+model = "gemma3:270m"
 
 dry_run = true
 require_confirmation = true
