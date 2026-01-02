@@ -50,22 +50,29 @@ impl ScyApi {
         }
     }
 
+
     fn ollama_chat_json(&self, setting: &SconnySetting, user_prompt: &str, system_prompt: &str) -> Result<String, ScyApiError> {
-        let base = setting.ollama_base_url.clone().unwrap_or_else(|| "http://127.0.0.1:11434".to_string());
-        let model = setting.model.clone().unwrap_or_else(|| "gemma3:1b".to_string());
+        let base = setting
+            .ollama_base_url
+            .clone()
+            .unwrap_or_else(|| "http://127.0.0.1:11434".to_string());
+
+        let model = setting
+            .model
+            .clone()
+            .unwrap_or_else(|| "gemma3:1b".to_string());
 
         let client = OllamaApi::new(base, setting.policy.timeout_sec);
 
-        let content = client
-            .chat_once_json_only(&model, system_prompt, user_prompt)
-            .map_err(|e| match e {
-                OllamaError::Io(ioe) => ScyApiError::Io(ioe),
-                OllamaError::CommandFailed{code,stdout,stderr} => ScyApiError::CommandFailed{code,stdout,stderr},
-                OllamaError::ParseFailed(m) => ScyApiError::ParseFailed(m),
-            })?;
+        let content = client.chat_once(&model, system_prompt, user_prompt).map_err(|e| match e {
+            OllamaError::Io(ioe) => ScyApiError::Io(ioe),
+            OllamaError::CommandFailed { code, stdout, stderr } => ScyApiError::CommandFailed { code, stdout, stderr },
+            OllamaError::ParseFailed(m) => ScyApiError::ParseFailed(m),
+        })?;
 
         Ok(content)
     }
+
 
 
 

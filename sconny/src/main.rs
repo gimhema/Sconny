@@ -12,6 +12,8 @@ use scy_api::{ScyApi, ScyApiError};
 use scy_console::{parse_console_request_from_args, run_repl_loop, ConsoleMode};
 use scy_prompt::build_prompt;
 use scy_setting::SconnySetting;
+use crate::ollama_api::scy_ollama_api::{OllamaApi, OllamaError};
+
 
 fn main() {
     // 1) setting load

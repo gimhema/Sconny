@@ -12,6 +12,7 @@ pub enum LlmService {
     Ollama, // ✅ 추가
 }
 
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ScyOs {
     Windows,
@@ -38,10 +39,7 @@ pub struct ExecPolicy {
 pub struct SconnySetting {
     pub llm_service: LlmService,
     pub model: Option<String>,
-
-    // ✅ 추가
     pub ollama_base_url: Option<String>,
-
     pub env: ScyEnvInfo,
     pub policy: ExecPolicy,
     pub config_path: String,
@@ -52,10 +50,7 @@ impl SconnySetting {
         SconnySetting {
             llm_service: LlmService::OpenAI,
             model: None,
-
-            // ✅ 추가
             ollama_base_url: None,
-
             env: ScyEnvInfo {
                 os: detect_os(),
                 distro_id: None,
@@ -216,7 +211,6 @@ fn apply_env_overrides(setting: &mut SconnySetting) {
         }
     }
 
-    // ✅ 추가
     if let Ok(v) = env::var("SCONNY_OLLAMA_BASE_URL") {
         if !v.trim().is_empty() {
             setting.ollama_base_url = Some(v.trim().to_string());
@@ -262,7 +256,7 @@ fn parse_llm_service(s: &str) -> Option<LlmService> {
     match s.trim().to_lowercase().as_str() {
         "openai" => Some(LlmService::OpenAI),
         "gemini" => Some(LlmService::Gemini),
-        "ollama" => Some(LlmService::Ollama), // ✅ 추가
+        "ollama" => Some(LlmService::Ollama),
         _ => None,
     }
 }
